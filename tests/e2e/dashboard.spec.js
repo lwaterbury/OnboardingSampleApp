@@ -39,3 +39,16 @@ test.describe('Onboarding Dashboard', () => {
     await expect(page.locator('.placeholder h2')).toContainText('Customer Info');
   });
 });
+
+test.describe('Tenant Setup', () => {
+  test('should create a tenant from the form', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Tenant Setup' }).click();
+
+    await page.getByLabel('Status').selectOption('active');
+    await page.getByLabel('Plan').selectOption('enterprise');
+    await page.getByRole('button', { name: 'Create tenant' }).click();
+
+    await expect(page.locator('.tenant-list li').filter({ hasText: 'active · enterprise' })).toBeVisible();
+  });
+});

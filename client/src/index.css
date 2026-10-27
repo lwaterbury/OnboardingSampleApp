@@ -169,3 +169,28 @@ header p {
   color: #6b7280;
   font-size: 0.9rem;
 }
+
+.tenant-form {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin: 16px 0;
+}
+
+.tenant-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.tenant-list {
+  list-style: none;
+  padding: 0;
+}
+
+.tenant-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}

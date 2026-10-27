@@ -91,7 +91,29 @@ function calculateProgress(steps) {
   return Math.round((completed / steps.length) * 100);
 }
 
+const TENANT_STATUSES = ['pending', 'provisioning', 'active', 'failed'];
+const TENANT_PLANS = ['starter', 'professional', 'enterprise'];
+
+/**
+ * Validates tenant input; returns a list of error messages (empty if valid)
+ * @param {Partial<Tenant>} data
+ * @returns {string[]}
+ */
+function validateTenantInput(data) {
+  const errors = [];
+  if (!TENANT_STATUSES.includes(data?.status)) {
+    errors.push(`status must be one of: ${TENANT_STATUSES.join(', ')}`);
+  }
+  if (!TENANT_PLANS.includes(data?.plan)) {
+    errors.push(`plan must be one of: ${TENANT_PLANS.join(', ')}`);
+  }
+  return errors;
+}
+
 module.exports = {
+  TENANT_STATUSES,
+  TENANT_PLANS,
+  validateTenantInput,
   createCustomer,
   createTenant,
   createDefaultOnboardingSteps,

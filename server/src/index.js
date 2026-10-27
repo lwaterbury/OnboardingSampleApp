@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const store = require('./data/store');
+const { createTenant, validateTenantInput } = require('./models');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -63,6 +64,21 @@ app.get('/api/tenants/:customerId', (req, res) => {
     return res.status(404).json({ error: 'Tenant not found' });
   }
   res.json(tenant);
+});
+
+// List all tenants
+app.get('/api/tenants', (req, res) => {
+  res.json(store.getTenants());
+});
+
+// Create a tenant (not yet associated with a customer)
+app.post('/api/tenants', (req, res) => {
+  const errors = validateTenantInput(req.body);
+  if (errors.length > 0) {
+    return res.status(400).json({ error: 'Invalid tenant', details: errors });
+  }
+  const tenant = createTenant({ status: req.body.status, plan: req.body.plan });
+  res.status(201).json(store.addTenant(tenant));
 });
 
 // Start server
