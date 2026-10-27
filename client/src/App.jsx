@@ -65,7 +65,7 @@ function App() {
           <PlaceholderTab title="Data Mapping" description="Map customer data to platform configuration" />
         )}
         {activeTab === 'tenant-setup' && (
-          <PlaceholderTab title="Tenant Setup" description="Provision and configure customer tenant" />
+          <TenantSetupTab />
         )}
         {activeTab === 'import' && (
           <PlaceholderTab title="Import" description="Import customer data into the platform" />
@@ -146,6 +146,67 @@ function Checklist({ steps }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+const TENANT_STATUSES = ['pending', 'provisioning', 'active', 'failed'];
+const TENANT_PLANS = ['starter', 'professional', 'enterprise'];
+
+function TenantSetupTab() {
+  const [status, setStatus] = useState('pending');
+  const [plan, setPlan] = useState('starter');
+  const [tenants, setTenants] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/tenants')
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then(setTenants)
+      .catch(err => setError(err.message));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await fetch('/api/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, plan })
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.details?.join('; ') || body.error);
+      setTenants(prev => [...prev, body]);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Tenant Setup</h2>
+      <form className="tenant-form" onSubmit={handleSubmit}>
+        <label>
+          Status
+          <select value={status} onChange={e => setStatus(e.target.value)}>
+            {TENANT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </label>
+        <label>
+          Plan
+          <select value={plan} onChange={e => setPlan(e.target.value)}>
+            {TENANT_PLANS.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </label>
+        <button type="submit">Create tenant</button>
+      </form>
+      {error && <p role="alert" style={{ color: '#dc2626' }}>{error}</p>}
+      <ul className="tenant-list">
+        {tenants.map(t => (
+          <li key={t.id}>{t.id} · {t.status} · {t.plan}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

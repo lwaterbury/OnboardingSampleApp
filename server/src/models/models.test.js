@@ -2,8 +2,9 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert');
 const { 
   createCustomer, 
-  createTenant, 
-  createDefaultOnboardingSteps, 
+  createTenant,
+  validateTenantInput,
+  createDefaultOnboardingSteps,
   calculateProgress 
 } = require('./index');
 
@@ -54,6 +55,28 @@ describe('Domain Models', () => {
         { status: 'completed' }
       ];
       assert.strictEqual(calculateProgress(steps), 100);
+    });
+  });
+
+  describe('validateTenantInput', () => {
+    it('should accept valid status and plan', () => {
+      assert.deepStrictEqual(validateTenantInput({ status: 'active', plan: 'enterprise' }), []);
+    });
+
+    it('should reject an unknown status', () => {
+      const errors = validateTenantInput({ status: 'bogus', plan: 'starter' });
+      assert.strictEqual(errors.length, 1);
+      assert.match(errors[0], /status/);
+    });
+
+    it('should reject an unknown plan', () => {
+      const errors = validateTenantInput({ status: 'pending', plan: 'free' });
+      assert.strictEqual(errors.length, 1);
+      assert.match(errors[0], /plan/);
+    });
+
+    it('should reject missing input', () => {
+      assert.strictEqual(validateTenantInput(undefined).length, 2);
     });
   });
 
